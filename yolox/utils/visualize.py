@@ -8,13 +8,12 @@ import numpy as np
 __all__ = ["vis"]
 
 
-def vis(img, boxes, scores, cls_ids, conf=0.5, class_names=None, atts=None, att_names=None):
+def vis(img, boxes, scores, cls_ids, conf=0.5, class_names=None):
 
     for i in range(len(boxes)):
         box = boxes[i]
         cls_id = int(cls_ids[i])
         score = scores[i]
-        att = atts[i]
         if score < conf:
             continue
         x0 = int(box[0])
@@ -23,35 +22,22 @@ def vis(img, boxes, scores, cls_ids, conf=0.5, class_names=None, atts=None, att_
         y1 = int(box[3])
 
         color = (_COLORS[cls_id] * 255).astype(np.uint8).tolist()
-        text = '{}:{:.1f}%-{}'.format(class_names[cls_id], score * 100, att_names[int(att)])
-
+        text = '{}:{:.1f}%'.format(class_names[cls_id], score * 100)
         txt_color = (0, 0, 0) if np.mean(_COLORS[cls_id]) > 0.5 else (255, 255, 255)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
-        txt_size = cv2.getTextSize(text, font, 0.6, 1)[0]
+        txt_size = cv2.getTextSize(text, font, 0.4, 1)[0]
         cv2.rectangle(img, (x0, y0), (x1, y1), color, 2)
 
         txt_bk_color = (_COLORS[cls_id] * 255 * 0.7).astype(np.uint8).tolist()
-        # cv2.rectangle(
-        #     img,
-        #     (x0, y0 + 1),
-        #     (x0 + txt_size[0] + 1, y0 + int(1.5*txt_size[1])),
-        #     txt_bk_color,
-        #     -1
-        # )
-        # cv2.putText(img, text, (x0, y0 + txt_size[1]), font, 0.6, txt_color, thickness=1)
-        cv2.putText(img, text, (x0, y0), font, 1.4, color, thickness=2)
- 
-        # att_text = '{}'.format(att_names[int(att)])
-        # cv2.putText(img, att_text, (x0,y1), font, 0.8, (255,0,0), thickness=2)
-
-        # for att_id in range(len(att_names)):
-        #     if att_id in att:
-        #         att_text = '{}:{}'.format(att_names[att_id], "True")
-        #         cv2.putText(img, att_text, (x0 , y0 + txt_size[1]*att_id*2 + 40), font, 0.8, (255, 0, 0), thickness=1)
-        #     else:
-        #         att_text = '{}:{}'.format(att_names[att_id], "False")
-        #         cv2.putText(img, att_text, (x0 , y0 + txt_size[1]*att_id*2 + 40), font, 0.8, (255, 0, 0), thickness=1)
+        cv2.rectangle(
+            img,
+            (x0, y0 + 1),
+            (x0 + txt_size[0] + 1, y0 + int(1.5*txt_size[1])),
+            txt_bk_color,
+            -1
+        )
+        cv2.putText(img, text, (x0, y0 + txt_size[1]), font, 0.4, txt_color, thickness=1)
 
     return img
 

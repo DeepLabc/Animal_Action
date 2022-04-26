@@ -1,3 +1,6 @@
+"""
+python tools/top_down_video_det.py -n yolox-s --path ./demo/zebra.mp4 --save_result --device gpu 
+"""
 import argparse
 import os
 import time
@@ -6,7 +9,7 @@ import cv2
 import torch
 from torch import tensor,float32,cat
 from yolox.data.data_augment import ValTransform
-from yolox.data.datasets import COCO_CLASSES, VOC_CLASSES, ATTRIBUTE
+from yolox.data.datasets import COCO_CLASSES, VOC_CLASSES #ATTRIBUTE
 from yolox.exp import get_exp
 from yolox.utils import fuse_model, get_model_info, postprocess, vis
 import numpy as np
@@ -60,8 +63,8 @@ def make_parser():
         type=str,
         help="pls input your experiment description file",
     )
-    parser.add_argument("-c", "--ckpt", default='', type=str, help="ckpt for eval")
-    parser.add_argument("-pose", "--pose_checkpoint", default='', type=str, help="pose ckpt path")
+    parser.add_argument("-c", "--ckpt", default='./ckpt/best_ckpt.pth', type=str, help="ckpt for eval")
+    parser.add_argument("-pose", "--pose_checkpoint", default='./ckpt/hrnet_w32_ap10k_256x256-18aac840_20211029.pth', type=str, help="pose ckpt path")
     parser.add_argument('-pose_config', default='./pose/hrnet_w32_ap10k_256_256.py', help='Config file for pose')
     parser.add_argument(
         "--device",
@@ -69,7 +72,7 @@ def make_parser():
         type=str,
         help="device to run our model, can either be cpu or gpu",
     )
-    parser.add_argument("--conf", default=0.1, type=float, help="test conf")
+    parser.add_argument("--conf", default=0.5, type=float, help="test conf")
     parser.add_argument("--nms", default=0.65, type=float, help="test nms threshold")
     parser.add_argument("--tsize", default=640, type=int, help="test img size")
     parser.add_argument(
@@ -135,7 +138,6 @@ class Predictor(object):
         model,
         exp,
         cls_names=COCO_CLASSES,
-        att_names=ATTRIBUTE,
         trt_file=None,
         decoder=None,
         device="cpu",
@@ -146,7 +148,7 @@ class Predictor(object):
         self.cls_names = cls_names
         self.decoder = decoder
         self.num_classes = exp.num_classes
-        self.att_names = att_names    #     
+        # self.att_names = att_names    #     
         self.confthre = exp.test_conf
         self.nmsthre = exp.nmsthre
         self.test_size = exp.test_size
@@ -167,7 +169,7 @@ class Predictor(object):
         img_info["height"] = height
         img_info["width"] = width
         img_info["raw_img"] = img
-
+       
         ratio = min(self.test_size[0] / img.shape[0], self.test_size[1] / img.shape[1])
         img_info["ratio"] = ratio
 
@@ -205,7 +207,7 @@ class Predictor(object):
 
         cls = output[:, 6]
         scores = output[:, 4] * output[:, 5]
-        atts = output[:, 7:10]  # bbox,3   
+        # atts = output[:, 7:10]  # bbox,3   
            
         # HRNet
         ret_bbox = []
@@ -233,8 +235,10 @@ class Predictor(object):
 
         dets = np.array(sort_det)
         dets = torch.from_numpy(dets).cuda()
+
+        vis_res = vis(img, bboxes, scores, cls, cls_thresh, self.cls_names)
         
-        return ret_bbox,dets, img
+        return ret_bbox, dets
         
         # return vis_res
 
@@ -258,7 +262,7 @@ def image_demo(predictor, vis_folder, path, current_time, save_result, args):
 
     for image_name in files:
         outputs, img_info = predictor.inference(image_name)
-        ret_bbox, dets, att_img = predictor.visual(outputs[0], img_info, predictor.confthre)  #  list  detection bbox
+        ret_bbox, dets = predictor.visual(outputs[0], img_info, predictor.confthre)  #  list  detection bbox
         # test a single image, with a list of bboxes.
         if len(ret_bbox)==0:
             continue
@@ -346,14 +350,12 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
     while True:
         ret_val, frame = cap.read()
         if ret_val:
-
             outputs, img_info = predictor.inference(frame)
             if outputs[0]==None:
                 if args.save_result:
                     vid_writer.write(frame)
                     continue
-            hrnet_bbox, dets, img = predictor.visual(outputs[0], img_info, predictor.confthre)  #  list  detection bbox
-        
+            hrnet_bbox, dets= predictor.visual(outputs[0], img_info, predictor.confthre)  #  list  detection bbox
             detected = dets
             tracker.predict()
                 
@@ -485,7 +487,7 @@ def main(exp, args):
         trt_file = None
         decoder = None
 
-    predictor = Predictor(model, exp, VOC_CLASSES, ATTRIBUTE, trt_file, decoder, args.device, args.fp16, args.legacy)
+    predictor = Predictor(model, exp, VOC_CLASSES, trt_file, decoder, args.device, args.fp16, args.legacy)
     current_time = time.localtime()
     if args.demo == "image":
         image_demo(predictor, vis_folder, args.path, current_time, args.save_result, args)

@@ -25,6 +25,19 @@
 #     "train",
 #     "tvmonitor",
 # )
+
+# VOC_CLASSES = (
+#     "wolf",
+#     "cow",
+#     "rabbit",
+#     "deer",
+# )
+
+# VOC_CLASSES = (
+#     "wolf",
+#     "sheep",
+# )
+
 VOC_CLASSES = (
     "wolf",
     "sheep",
@@ -37,16 +50,3 @@ VOC_CLASSES = (
     "tiger",
     "zebra",
 )
-
-ATTRIBUTE = (
-    "walk",
-    "run",
-    "lay",
-)
-
-    # "black",
-    # "white",
-    # "tan",
-    # "front",
-    # "back",
-    # "side",

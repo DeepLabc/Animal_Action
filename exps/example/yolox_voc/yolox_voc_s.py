@@ -1,6 +1,8 @@
 # encoding: utf-8
+"""
+python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 1 -b 8   
+"""
 import os
-
 import torch
 import torch.distributed as dist
 
@@ -44,7 +46,7 @@ class Exp(MyExp):
             dataset = VOCDetection(
                 # data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
                 # image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
-                data_dir = "dataset path",
+                data_dir = "/home/lyg/workspace/AAction/datasets/animal",
                 image_sets = [('train')],
                 img_size=self.input_size,
                 preproc=TrainTransform(
@@ -67,7 +69,7 @@ class Exp(MyExp):
             mosaic_scale=self.mosaic_scale,
             mixup_scale=self.mixup_scale,
             shear=self.shear,
-            perspective=self.perspective,
+            #perspective=self.perspective,
             enable_mixup=self.enable_mixup,
             mosaic_prob=self.mosaic_prob,
             mixup_prob=self.mixup_prob,
@@ -105,7 +107,7 @@ class Exp(MyExp):
         valdataset = VOCDetection(
             # data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
             # image_sets=[('2007', 'test')],
-            data_dir = "dataset path",
+            data_dir = "/home/lyg/workspace/AAction/datasets/animal",
             image_sets = [('val')],
             img_size=self.test_size,
             preproc=ValTransform(legacy=legacy),

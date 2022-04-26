@@ -49,7 +49,7 @@ class AnnotationTransform(object):
         Returns:
             a list containing lists of bounding boxes  [bbox coords, class name]
         """
-        res = np.empty((0, 8))
+        res = np.empty((0, 5))
         for obj in target.iter("object"):
             difficult = obj.find("difficult")
             if difficult is not None:
@@ -68,22 +68,15 @@ class AnnotationTransform(object):
                 # scale height or width
                 # cur_pt = cur_pt / width if i % 2 == 0 else cur_pt / height
                 bndbox.append(cur_pt)
-
             label_idx = self.class_to_ind[name]
-                
             bndbox.append(label_idx)
-
-            a = obj.find("attr").text.strip()
-            # for i in range(len(a)):
-            for i in range(3):
-                bndbox.append(int(a[i]))
-            
             res = np.vstack((res, bndbox))  # [xmin, ymin, xmax, ymax, label_ind]
             # img_id = target.find('filename').text[:-4]
 
         width = int(target.find("size").find("width").text)
         height = int(target.find("size").find("height").text)
         img_info = (height, width)
+
         return res, img_info
 
 
@@ -113,7 +106,7 @@ class VOCDetection(Dataset):
         img_size=(416, 416),
         preproc=None,
         target_transform=AnnotationTransform(),
-        dataset_name="VOC2017",
+        dataset_name="VOC0712",
         cache=False,
     ):
         super().__init__(img_size)
@@ -127,14 +120,9 @@ class VOCDetection(Dataset):
         self._imgpath = os.path.join("%s", "JPEGImages", "%s.jpg")
         self._classes = VOC_CLASSES
         self.ids = list()
-        # for (year, name) in image_sets:
-        #     self._year = year
-        #     rootpath = os.path.join(self.root, "VOC" + year)
-        #     for line in open(
-        #         os.path.join(rootpath, "ImageSets", "Main", name + ".txt")
-        #     ):
-        #         self.ids.append((rootpath, line.strip()))
-        for name in image_sets:
+        for (name) in image_sets:
+            # self._year = year
+            # rootpath = os.path.join(self.root, "VOC" + year)
             rootpath = self.root
             for line in open(
                 os.path.join(rootpath, "ImageSets", "Main", name + ".txt")
@@ -165,7 +153,7 @@ class VOCDetection(Dataset):
         cache_file = self.root + "/img_resized_cache_" + self.name + ".array"
         if not os.path.exists(cache_file):
             logger.info(
-                "Caching images for the frist time. This might take about 3 minutes for VOC"
+                "Caching images for the first time. This might take about 3 minutes for VOC"
             )
             self.imgs = np.memmap(
                 cache_file,
@@ -188,7 +176,9 @@ class VOCDetection(Dataset):
             pbar.close()
         else:
             logger.warning(
-                "You are using cached imgs! Make sure your dataset is not changed!!"
+                "You are using cached imgs! Make sure your dataset is not changed!!\n"
+                "Everytime the self.input_size is changed in your exp file, you need to delete\n"
+                "the cached data and re-generate them.\n"
             )
 
         logger.info("Loading cached imgs...")
@@ -205,13 +195,13 @@ class VOCDetection(Dataset):
 
         assert self.target_transform is not None
         res, img_info = self.target_transform(target)
-        
         height, width = img_info
+
         r = min(self.img_size[0] / height, self.img_size[1] / width)
         res[:, :4] *= r
         resized_info = (int(height * r), int(width * r))
 
-        return (res, img_info, resized_info)   # res[batch, n, 14]
+        return (res, img_info, resized_info)
 
     def load_anno(self, index):
         return self.annotations[index][0]
@@ -246,24 +236,22 @@ class VOCDetection(Dataset):
             img, target
         """
         if self.imgs is not None:
-            target, img_info, resized_info = self.annotations[index]  # target [num_class, 14]
+            target, img_info, resized_info = self.annotations[index]
             pad_img = self.imgs[index]
             img = pad_img[: resized_info[0], : resized_info[1], :].copy()
         else:
             img = self.load_resized_img(index)
             target, img_info, _ = self.annotations[index]
-            # use
-        
+
         return img, target, img_info, index
 
     @Dataset.mosaic_getitem
     def __getitem__(self, index):
         img, target, img_info, img_id = self.pull_item(index)
+
         if self.preproc is not None:
             img, target = self.preproc(img, target, self.input_dim)
 
-        if self.image_set[0]=='val':
-            target = np.pad(target, ((0, 50-target.shape[0]),(0,0)),'constant', constant_values = (0,0))
         return img, target, img_info, img_id
 
     def evaluate_detections(self, all_boxes, output_dir=None):
@@ -325,8 +313,7 @@ class VOCDetection(Dataset):
                         )
 
     def _do_python_eval(self, output_dir="output", iou=0.5):
-        # rootpath = os.path.join(self.root, "VOC" + self._year) 
-        # name = self.image_set[0][1]
+        # rootpath = os.path.join(self.root, "VOC" + self._year)
         rootpath = self.root
         name = self.image_set[0]
         annopath = os.path.join(rootpath, "Annotations", "{:s}.xml")
@@ -339,7 +326,6 @@ class VOCDetection(Dataset):
             os.makedirs(cachedir)
         aps = []
         # The PASCAL VOC metric changed in 2010
-        # use_07_metric = True if int(self._year) < 2010 else False
         use_07_metric = True
         print("Eval IoU : {:.2f}".format(iou))
         if output_dir is not None and not os.path.isdir(output_dir):

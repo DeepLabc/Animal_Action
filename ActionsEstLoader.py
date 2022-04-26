@@ -13,7 +13,7 @@ class TSSTG(object):
         device: (str) Device to load the model on 'cpu' or 'cuda'.
     """
     def __init__(self,
-                 weight_file='/home/lyg/workspace/YOLOX/Actionsrecognition/save/animal/tsstg-model.pth',
+                 weight_file='./ckpt/tsstg-model.pth',
                  device='cuda'):
         self.graph_args = {'strategy': 'spatial'}
         self.class_names = ['Stand', 'Walk', 'Run', 'Lay', 'Eat']

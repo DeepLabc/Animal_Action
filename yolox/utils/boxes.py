@@ -45,15 +45,10 @@ def postprocess(prediction, num_classes, conf_thre=0.7, nms_thre=0.45, class_agn
             continue
         # Get score and class with highest confidence
         class_conf, class_pred = torch.max(image_pred[:, 5: 5 + num_classes], 1, keepdim=True)
-        # print(class_pred.shape)  (8400,1)
-        # att_pred = image_pred[:, 5 + num_classes:] # 8400,3
-        # maxk = max((1,3))
-        # index, attPred = att_pred.topk(maxk, 1, True, True)   # 8400, 3  attPred is used
-        att_conf, att_pred = torch.max(image_pred[:,5+num_classes:], 1, keepdim=True)
-        conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= conf_thre).squeeze()
 
+        conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= conf_thre).squeeze()
         # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-        detections = torch.cat((image_pred[:, :5], class_conf, class_pred.float(), att_pred), 1)
+        detections = torch.cat((image_pred[:, :5], class_conf, class_pred.float()), 1)
         detections = detections[conf_mask]
         if not detections.size(0):
             continue

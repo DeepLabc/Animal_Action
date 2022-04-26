@@ -4,7 +4,7 @@
 
 from .coco import COCODataset
 from .coco_classes import COCO_CLASSES
+from .voc_classes import VOC_CLASSES
 from .datasets_wrapper import ConcatDataset, Dataset, MixConcatDataset
 from .mosaicdetection import MosaicDetection
 from .voc import VOCDetection
-from .voc_classes import VOC_CLASSES, ATTRIBUTE

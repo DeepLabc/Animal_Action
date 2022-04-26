@@ -91,15 +91,14 @@ class Trainer:
         iter_start_time = time.time()
 
         inps, targets = self.prefetcher.next()
-
         inps = inps.to(self.data_type)
         targets = targets.to(self.data_type)
         targets.requires_grad = False
         inps, targets = self.exp.preprocess(inps, targets, self.input_size)
         data_end_time = time.time()
-        
+
         with torch.cuda.amp.autocast(enabled=self.amp_training):
-            outputs = self.model(inps, targets)  # inps shape (B, 3, 640, 640)
+            outputs = self.model(inps, targets)
 
         loss = outputs["total_loss"]
 
@@ -151,7 +150,6 @@ class Trainer:
         )
         logger.info("init prefetcher, this might take one minute or less...")
         self.prefetcher = DataPrefetcher(self.train_loader)
-
         # max_iter means iters per epoch
         self.max_iter = len(self.train_loader)
 
@@ -162,7 +160,7 @@ class Trainer:
             occupy_mem(self.local_rank)
 
         if self.is_distributed:
-            model = DDP(model, device_ids=[self.local_rank], broadcast_buffers=False)  #find_unused_parameters=True
+            model = DDP(model, device_ids=[self.local_rank], broadcast_buffers=False)
 
         if self.use_model_ema:
             self.ema_model = ModelEMA(model, 0.9998)
@@ -178,8 +176,8 @@ class Trainer:
         if self.rank == 0:
             self.tblogger = SummaryWriter(self.file_name)
 
-        # logger.info("Training start...")
-        # logger.info("\n{}".format(model))
+        logger.info("Training start...")
+        logger.info("\n{}".format(model))
 
     def after_train(self):
         logger.info(
@@ -204,7 +202,7 @@ class Trainer:
     def after_epoch(self):
         self.save_ckpt(ckpt_name="latest")
 
-        if (self.epoch + 1) % self.exp.eval_interval == 0:  # use test
+        if (self.epoch + 1) % self.exp.eval_interval == 0:
             all_reduce_norm(self.model)
             self.evaluate_and_save_model()
 
@@ -312,7 +310,6 @@ class Trainer:
             loss_meter = self.meter.get_filtered_meter("loss")
             for k, v in loss_meter.items():
                 self.tblogger.add_scalar(k,v.latest, self.epoch + 1)
-            logger.info("\n" + summary)
             logger.info("\n" + summary)
         synchronize()
 
