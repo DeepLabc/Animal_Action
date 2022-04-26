@@ -10,12 +10,7 @@ Action classes including: Stand, Walk, Run, Lay, Eat
 
 conda create -n yolox python=3.9
 
-2、conda activate yolox
-```
-pip install requirement.txt
-```
-
-3、yolox config, see details at: https://github.com/Megvii-BaseDetection/YOLOX
+2、yolox config, see details at: https://github.com/Megvii-BaseDetection/YOLOX
 
 
 ## Download pretrain weight(Baidu netdisk)
@@ -27,7 +22,7 @@ skeleton detetion: https://pan.baidu.com/s/10CWV0Qrbn69XXRjygnSdbA (nwtr)
 action predict: https://pan.baidu.com/s/188_0wvfiKCQKOCYshb-58g (5ai5)
 
 ## Use
-we use yolox_s model to complete animal detection, note that YOLOX is not the original version and contains a branch of the predictive behavior of a single frame. Details can be seen in the code and then changed as you needed.
+We use yolox_s model to complete animal detection
 
 Modifying the weight path of st-gcn in script ./ActionEstLoader.py
 
