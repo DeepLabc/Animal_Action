@@ -3,7 +3,7 @@ This is a repo for animal behavior recognition based on skeleton. First, use YOL
 
 Action classes including: Stand, Walk, Run, Lay, Eat
 
-![img](https://github.com/YiguanLiao/AAction/blob/844d4a8278e0629c0073efdcae7d23a3afa9790c/test2.gif)
+![img](test2.gif)
 
 ## Configure
 1、install anaconda(Optional)
