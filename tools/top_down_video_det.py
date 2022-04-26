@@ -235,8 +235,8 @@ class Predictor(object):
 
         dets = np.array(sort_det)
         dets = torch.from_numpy(dets).cuda()
-
-        vis_res = vis(img, bboxes, scores, cls, cls_thresh, self.cls_names)
+        # visual animal class
+        # vis_res = vis(img, bboxes, scores, cls, cls_thresh, self.cls_names)
         
         return ret_bbox, dets
         
