@@ -8,14 +8,13 @@ Action classes including: Stand, Walk, Run, Lay, Eat
 ## Configure
 1、install anaconda(Optional)
 
-conda create -n yolox python=3.9
 
 2、yolox config, see details at: https://github.com/Megvii-BaseDetection/YOLOX
 
 
 ## Download pretrain weight(Baidu netdisk)
 
-target detetion: https://pan.baidu.com/s/1WQM_l_qCQXISuB8YDhINxw  (i4zl)
+target detetion: 链接：https://pan.baidu.com/s/13xstEeDE0Eh9CsikGETYLQ (gvn7)
 
 skeleton detetion: https://pan.baidu.com/s/10CWV0Qrbn69XXRjygnSdbA (nwtr)
 
