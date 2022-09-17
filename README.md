@@ -14,7 +14,7 @@ Action classes including: Stand, Walk, Run, Lay, Eat
 
 ## Download pretrain weight(Baidu netdisk)
 
-target detetion: 链接：https://pan.baidu.com/s/13xstEeDE0Eh9CsikGETYLQ (gvn7)
+target detetion：https://pan.baidu.com/s/13xstEeDE0Eh9CsikGETYLQ (gvn7)
 
 skeleton detetion: https://pan.baidu.com/s/10CWV0Qrbn69XXRjygnSdbA (nwtr)
 
